@@ -1,0 +1,36 @@
+// font
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+@import "./variables";
+
+// reset
+*{
+    box-sizing: border-box;
+}
+body{
+    font-family: 'Ubuntu', sans-serif;
+    background-color: $Magnolia;
+    color: $Marine-blue;
+}
+p{
+    font-size: 16px;
+    color: $Cool-gray;
+}
+ul{
+    list-style: none;
+    padding: 0;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+input{
+    outline: none;
+    color: $Marine-blue;
+}
+label{
+    color: $Marine-blue;
+}
+h1,h2,h3,h4,h5,h6{
+    color: $Light-blue;
+}
