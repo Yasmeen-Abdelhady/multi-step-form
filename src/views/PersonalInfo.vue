@@ -62,6 +62,11 @@ export default {
             phone : {required ,numeric}
         }
     },
+    mounted(){
+        this.userName = this.$store.state.user.userName;
+        this.email = this.$store.state.user.email;
+        this.phone = this.$store.state.user.phone;
+    },
     methods:{
         async validateForm(){
             this.v$.$validate();
@@ -93,6 +98,9 @@ form{
             padding: 10px;
             width: 100%;
             margin-top: 10px;
+            &:focus{
+                border-color: hsl(213, 96%, 18%);
+            }
         }
     }
 }

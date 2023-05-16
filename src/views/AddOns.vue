@@ -4,7 +4,8 @@
         <template v-slot:p>Add-ons help enhance your gaming experience.</template>
     </FormTitle>
     <div class="services">
-        <div class="service" v-for="service in services" :key="service.id">
+        <div class="service" v-for="service in services" :key="service.id"
+        :class="{selected: checkedOns.includes(service)}">
             <div class="checkDiv">
                 <input type="checkbox" :id="service.id" :name="service.id" :value="service" v-model="checkedOns">
                 <label :for="service.id"> 
@@ -39,24 +40,34 @@ export default {
                     description:'Access to multiplayer games',
                     pricePerMonth:'+$1/mo',
                     pricePerYear:'+$10/yr',
-                    id:'service1',
+                    id:'0',
                 },
                 {
                     name:' Larger storage',
                     description:'Extra 1TB of cloud save',
                     pricePerMonth:'+$2/mo',
                     pricePerYear:'+$20/yr',
-                    id:'service2'
+                    id:'1'
                 },
                 {
                     name:'Customizable Profile ',
                     description:'Custom theme on your profile ',
                     pricePerMonth:'+$2/mo',
                     pricePerYear:'+$20/yr',
-                    id:'service3'
+                    id:'2'
                 }
             ],
             checkedOns:[]
+        }
+    },
+    mounted() {
+        if(this.$store.state.stepNumber < 3){
+            this.$router.push({name: 'PersonalInfo'})
+        }
+        else{
+            this.$store.state.onsObj.forEach(ele => {
+                this.checkedOns.push(ele)
+            });
         }
     },
     methods: {
@@ -69,25 +80,10 @@ export default {
             this.$store.commit('increaseStep')
         },
         onsData(){
-            let newData=[]
-            newData = this.checkedOns.map((obj)=>{
-                if(this.$store.state.month == true){
-                    return {
-                        onsName: obj.name ,
-                        price: obj.pricePerMonth
-                    }
-                }
-                else{
-                    return {
-                        onsName: obj.name ,
-                        price: obj.pricePerYear
-                    }
-                }
-            });
             if(this.$store.state.onsObj){
                 this.$store.state.onsObj.length = 0
             }
-            newData.forEach(ele => {
+            this.checkedOns.forEach(ele => {
                 this.$store.commit('setOnsData', ele)
             });
             this.next();
@@ -99,7 +95,7 @@ export default {
 <style lang="scss" scoped>
 .services{
     .service{
-        border: 1px solid gray;
+        border: 1px solid #ccc;
         border-radius: 10px;
         margin-bottom: 20px;
         padding: 20px 25px;
@@ -107,6 +103,9 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        &:hover , &.selected{
+            border-color:hsl(213, 96%, 18%); 
+        }
         .checkDiv{
             display: flex;
             align-items: center;

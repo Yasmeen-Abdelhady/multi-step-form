@@ -4,42 +4,18 @@
         <template v-slot:p> You have the option of monthly or yearly billing. </template>
     </FormTitle>
     <div class="cards">
-        <div class="card" @click="getPlanData()">
-            <input type="radio" id="card1" name="card" value='{"name": "Arcade" , "pricePerMonth": "$9/mo" , "pricePerYear":"$90/yr" }' v-model="cardValue" />
+        <div class="card" v-for="card in cards" :key="card.name" >
+            <input type="radio" id="card1" name="card" :class="{selected:card.name == this.cardValue.name}" v-model="cardValue" :value="card"/>
             <label for="card1">
-                <img src="../assets/images/icon-arcade.svg" />
-                <div class="name">Arcade</div>
-                <div class="price" v-if="$store.state.month">$9/mo</div>
+                <img :src="card.image" />
+                <div class="name">{{card.name}}</div>
+                <div class="price" v-if="$store.state.month">{{card.pricePerMonth}}</div>
                 <div v-else >
-                    <div class="price">$90/yr</div>
-                    <div>2 months free</div>
+                    <div class="price">{{card.pricePerYear}}</div>
+                    <div>{{card.offers}}</div>
                 </div>
             </label>
         </div>
-        <div class="card" @click="getPlanData()">
-            <input type="radio" id="card2" name="card" value='{"name": "Advanced" , "pricePerMonth": "$12/mo" , "pricePerYear":"$120/yr" }' v-model="cardValue" />
-            <label for="card2">
-                <img src="../assets/images/icon-advanced.svg" />
-                <div class="name">Advanced</div>
-                <div class="price" v-if="$store.state.month">$12/mo</div>
-                <div v-else >
-                    <div class="price">$120/yr</div>
-                    <div>2 months free</div>
-                </div>
-            </label>
-        </div>
-        <div class="card" @click="getPlanData()">
-            <input type="radio" id="card3" name="card" value='{"name": "pro" , "pricePerMonth": "$15/mo" , "pricePerYear":"$150/yr" }' v-model="cardValue" />
-            <label for="card3">
-                <img src="../assets/images/icon-pro.svg" />
-                <div class="name">Pro</div>
-                <div class="price" v-if="$store.state.month">$15/mo</div>
-                <div v-else >
-                    <div class="price">$150/yr</div>
-                    <div>2 months free</div>
-                </div>
-            </label>
-        </div>    
     </div>
     <div class="switch-container">
         <span>Monthly</span>
@@ -49,6 +25,7 @@
         </label>
         <span>yearly</span>
     </div>
+    <div class="error" v-if="errorMsg">{{errorMsg}}</div>
     <div class="buttons">
         <div class="back" @click="back()"> Go Back </div>
         <ButtonComponent @click="next()">
@@ -58,18 +35,57 @@
 </template>
 
 <script>
+import image1 from "../assets/images/icon-arcade.svg"
+import image2 from "../assets/images/icon-advanced.svg"
+import image3 from "../assets/images/icon-pro.svg"
 import ButtonComponent from '@/components/smallComponent/ButtonComponent.vue'
 import FormTitle from "../components/smallComponent/FormTitle.vue"
 export default {
     components: {FormTitle , ButtonComponent},
     data() {
         return {
-            switchValue:false ,
-            cardValue:'',
+            switchValue: !this.$store.state.month ,
+            cardValue:{},
             planObject: {
                 planName: '',
-                planPrice:''
-            }
+                pricePerMonth:'',
+                pricePerYear:''
+            },
+            card:{},
+            cards: [
+                {
+                    image: image1,
+                    name: 'Arcade',
+                    price: '$9/mo',
+                    pricePerMonth:'$9/mo',
+                    pricePerYear:'$90/yr',
+                    offers:'2 months free'
+                },
+                {
+                    image: image2,
+                    name: 'Advanced',
+                    pricePerMonth:'$12/mo',
+                    pricePerYear:'$120/yr',
+                    offers:'2 months free'
+                },{
+                    image: image3,
+                    name: 'Pro',
+                    pricePerMonth:'$15/mo',
+                    pricePerYear:'$150/yr',
+                    offers:'2 months free'
+                }
+            ],
+            errorMsg:''
+        }
+    },
+    mounted() {
+        if(this.$store.state.stepNumber < 2){
+            this.$router.push({name: 'PersonalInfo'})
+        }
+        else{
+            this.cardValue.name = this.$store.state.planObj.planName;
+            this.cardValue.pricePerMonth = this.$store.state.planObj.pricePerMonth;
+            this.cardValue.pricePerYear = this.$store.state.planObj.pricePerYear;
         }
     },
     methods: {
@@ -78,21 +94,24 @@ export default {
             this.$store.commit('decreaseStep')
         },
         next(){
-            this.$router.push({name: 'AddOns'})
-            this.$store.commit('increaseStep')
-        },
-        getPlanData(){
-            if(this.cardValue){
-                let cardValueObj = JSON.parse(this.cardValue)
-                this.planObject.planName = cardValueObj.name
-                if(this.$store.state.month == true){
-                    this.planObject.planPrice = cardValueObj.pricePerMonth
-                }
-                else{
-                    this.planObject.planPrice = cardValueObj.pricePerYear
-                }
-                this.$store.commit('setPlanObj' , this.planObject )
+            if(this.cardValue.name != undefined){
+                this.sendData();
+                this.$router.push({name: 'AddOns'})
+                this.$store.commit('increaseStep')
             }
+            else{
+                this.errorMsg = 'Select A Plan'
+            }
+                this.$router.push({name: 'AddOns'})
+                this.$store.commit('increaseStep')
+            this.sendData();
+            
+        },
+        sendData( ){
+            this.planObject.planName = this.cardValue.name;
+            this.planObject.pricePerMonth = this.cardValue.pricePerMonth;
+            this.planObject.pricePerYear = this.cardValue.pricePerYear;
+            this.$store.commit('setPlanObj' , this.planObject )
         }
     }
 }
@@ -121,6 +140,9 @@ export default {
             border-radius: 10px;
             border: 1px solid black;
             &:checked , &:hover{
+                border: 1px solid red;
+            }
+            &.selected{
                 border: 1px solid red;
             }
         }
@@ -201,6 +223,9 @@ export default {
         -ms-transform: translateX(26px);
         transform: translateX(26px);
     }
+}
+.error{
+    color: red;
 }
 .buttons{
     display: flex;

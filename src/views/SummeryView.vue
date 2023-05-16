@@ -13,14 +13,15 @@
                 <div>{{planObject.planPrice}}</div>
             </div>
             <hr/>
-            <div class="option" v-for="ons in onsObject" :key="ons.onsName"><span>{{ons.onsName}}</span> <span>{{ons.price}}</span></div>
+            <div class="option" v-for="ons in onsObject" :key="ons.name"><span>{{ons.onsName}}</span> <span>{{ons.price}}</span></div>
         </div>
-        <div class="total"><span>total (per {{time}})</span><span class="totalPrice">+$12/mo</span>
+        <div class="total"><span>total (per {{time}})</span><span class="totalPrice">+${{this.total}}/{{this.tm}}</span>
         </div>
+        <div v-if="errorMsg" class="error">{{errorMsg}}</div>
     </div>
     <div class="buttons">
         <div class="back" @click="back()"> Go Back </div>
-        <ButtonComponent @click="confirm()">
+        <ButtonComponent @click="confirm()" class="confirm">
             <template v-slot:action>confirm</template>
         </ButtonComponent>
     </div>
@@ -36,11 +37,20 @@ export default {
             planObject:{},
             onsObject:[],
             month: true,
-            time:''
+            time:'',
+            tm:'',
+            total: '',
+            errorMsg:''
         }
     },
     mounted() {
-        this.getDataFromVux();
+        if(this.$store.state.stepNumber < 4){
+            this.$router.push({name: 'PersonalInfo'})
+        }
+        else{
+            this.getDataFromVux();
+            this.calcTotal();
+        }
     },
     methods: {
         back(){
@@ -48,23 +58,59 @@ export default {
             this.$store.commit('decreaseStep')
         },
         getDataFromVux() {
-            this.planObject = this.$store.state.planObj
-            this.onsObject = this.$store.state.onsObj
             this.month = this.$store.state.month
             if(this.month == true){
                 this.time = "month"
+                this.tm = "Mo"
             }
             else{
-                this.time = "year"
+                this.time = "year",
+                this.tm = "Yr"
+            }
+            if(this.month == true){
+                this.planObject = {
+                    planName: this.$store.state.planObj.planName ,
+                    planPrice: this.$store.state.planObj.pricePerMonth
+                }
+            }
+            else{
+                this.planObject = {
+                    planName: this.$store.state.planObj.planName ,
+                    planPrice: this.$store.state.planObj.pricePerYear
+                }
+            }
+            this.onsObject = this.$store.state.onsObj.map((obj)=>{
+                if(this.month == true){
+                    return{
+                        onsName:obj.name,
+                        price:obj.pricePerMonth
+                    }
+                }
+                else{
+                    return{
+                        onsName:obj.name,
+                        price:obj.pricePerYear
+                    }
+                }
+            })
+        },
+        calcTotal() {
+            if(this.planObject.planPrice){
+                let planPrice = this.planObject.planPrice.match(/\d+/)[0]
+                this.total = parseInt(planPrice)
+                this.onsObject.forEach((obj)=>{
+                    this.total += parseInt(obj.price.match(/\d+/)[0])
+                })
+                this.$store.commit('setTotal' , `$${this.total}/${this.tm}`)
             }
         },
-        confirm(){
-            this.$store.dispatch('sendDataToApi');
+        async confirm(){
+            await this.$store.dispatch('sendDataToApi');
             if(this.$store.state.check == "succeed"){
                 this.$router.push({name: 'ThankYou'})
             }
             else{
-                console.log('not succeed')
+                this.errorMsg = this.$store.state.check;
             }
         }
     }
@@ -114,7 +160,12 @@ export default {
         align-items: center;
         .totalPrice{
             font-size: 20px;
+            color: hsl(243, 100%, 62%);
+            font-weight: bold;
         }
+    }
+    .error{
+        color: red;
     }
 }
 .buttons{
@@ -124,12 +175,14 @@ export default {
     position: absolute;
     bottom: 0;
     width: 100%;
-
     .back{
         color: gray;
         margin-top: 50px;
         margin-bottom: 20px;
         cursor: pointer;
+    }
+    .confirm{
+        background-color: hsl(243, 100%, 62%);
     }
 }
 </style>

@@ -53,7 +53,7 @@ export default {
 
 nav {
   padding: 30px;
-
+  
   li {
     &.active .step-number{
       color: black;

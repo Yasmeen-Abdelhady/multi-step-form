@@ -39,26 +39,31 @@ export default createStore({
     setPlanObj(state , payload){
       state.planObj = payload
     },
+    setTotal(state , payload){
+      state.totalPrice = payload
+    },
     checkData(state , payload){
       state.check = payload
     }
   },
   actions: {
     async sendDataToApi({ commit, state }){
-      await axios.post('http://localhost:3000/users',{
+      await axios.post('https://6462b6367a9eead6fad5180f.mockapi.io/api/v1/users',{
         user: state.user,
         period: state.month,
         plan: state.planObj,
         ons: state.onsObj,
         total: state.totalPrice
       }).then(res => {
-        console.log(res)
         if(res.status == 201){
           commit('checkData' , 'succeed')
         }
         else{
           commit('checkData' , 'not succeed')
         }
+      }).catch(error => {
+        console.log(error)
+        commit('checkData' , 'Request failed try again')
       })
     }
   },
