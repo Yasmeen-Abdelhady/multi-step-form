@@ -12,7 +12,7 @@
                 <div class="price" v-if="$store.state.month">{{card.pricePerMonth}}</div>
                 <div v-else >
                     <div class="price">{{card.pricePerYear}}</div>
-                    <div>{{card.offers}}</div>
+                    <div class="offer">{{card.offers}}</div>
                 </div>
             </label>
         </div>
@@ -102,9 +102,6 @@ export default {
             else{
                 this.errorMsg = 'Select A Plan'
             }
-                this.$router.push({name: 'AddOns'})
-                this.$store.commit('increaseStep')
-            this.sendData();
             
         },
         sendData( ){
@@ -138,12 +135,12 @@ export default {
             top: 0;
             left: 0;
             border-radius: 10px;
-            border: 1px solid black;
+            border: 1px solid #ccc;
             &:checked , &:hover{
-                border: 1px solid red;
+                border: 1px solid hsl(213, 96%, 18%);
             }
             &.selected{
-                border: 1px solid red;
+                border: 1px solid hsl(213, 96%, 18%);
             }
         }
         img{
@@ -151,6 +148,9 @@ export default {
         }
         .price{
             color: gray;
+        }
+        .offer{
+            color: hsl(213, 96%, 18%);
         }
     }
 }

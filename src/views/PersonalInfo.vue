@@ -43,7 +43,7 @@
 import FormTitle from '../components/smallComponent/FormTitle.vue';
 import ButtonComponent from "../components/smallComponent/ButtonComponent.vue";
 import useValidate from "@vuelidate/core";
-import { required , email , numeric} from "@vuelidate/validators";
+import { required , email , numeric , minLength , maxLength} from "@vuelidate/validators";
 
 export default {
     components : {FormTitle , ButtonComponent},
@@ -59,7 +59,7 @@ export default {
         return {
             userName : {required},
             email : {required , email},
-            phone : {required ,numeric}
+            phone : {required ,numeric , minLength:minLength(11),maxLength:maxLength(14)}
         }
     },
     mounted(){

@@ -6,6 +6,15 @@
     </div>
 </template>
 
+<script>
+export default {
+    mounted() {
+        if(this.$store.state.stepNumber == 1){
+            this.$router.push({name: 'PersonalInfo'})
+        }
+    }
+}
+</script>
 <style lang="scss" scoped>
 .thank-container{
     width: 100%;
